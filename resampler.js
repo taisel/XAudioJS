@@ -1,4 +1,6 @@
-//JavaScript Audio Resampler (c) 2011 - Grant Galitz
+//JavaScript Audio Resampler
+//Copyright (C) 2011-2015 Grant Galitz
+//Released to Public Domain
 function Resampler(fromSampleRate, toSampleRate, channels, outputBufferSize, noReturn) {
 	this.fromSampleRate = fromSampleRate;
 	this.toSampleRate = toSampleRate;
@@ -44,7 +46,7 @@ Resampler.prototype.initialize = function () {
 	}
 }
 Resampler.prototype.compileLinearInterpolationFunction = function () {
-	var toCompile = "var bufferLength = buffer.length;\
+	var toCompile = "var bufferLength = Math.min(buffer.length, upTo);\
 	var outLength = this.outputBufferSize;\
 	if ((bufferLength % " + this.channels + ") == 0) {\
 		if (bufferLength > 0) {\
@@ -84,10 +86,10 @@ Resampler.prototype.compileLinearInterpolationFunction = function () {
 	else {\
 		throw(new Error(\"Buffer was of incorrect sample length.\"));\
 	}";
-	this.resampler = Function("buffer", toCompile);
+	this.resampler = Function("buffer", "upTo", toCompile);
 }
 Resampler.prototype.compileMultiTapFunction = function () {
-	var toCompile = "var bufferLength = buffer.length;\
+	var toCompile = "var bufferLength = Math.min(buffer.length, upTo);\
 	var outLength = this.outputBufferSize;\
 	if ((bufferLength % " + this.channels + ") == 0) {\
 		if (bufferLength > 0) {\
@@ -157,18 +159,11 @@ Resampler.prototype.compileMultiTapFunction = function () {
 	else {\
 		throw(new Error(\"Buffer was of incorrect sample length.\"));\
 	}";
-	this.resampler = Function("buffer", toCompile);
+	this.resampler = Function("buffer", "upTo", toCompile);
 }
-Resampler.prototype.bypassResampler = function (buffer) {
-	if (this.noReturn) {
-		//Set the buffer passed as our own, as we don't need to resample it:
-		this.outputBuffer = buffer;
-		return buffer.length;
-	}
-	else {
-		//Just return the buffer passsed:
-		return buffer;
-	}
+Resampler.prototype.bypassResampler = function (buffer, upTo) {
+    this.outputBuffer = buffer;
+    return this.bufferSlice(upTo);
 }
 Resampler.prototype.bufferSlice = function (sliceAmount) {
 	if (this.noReturn) {

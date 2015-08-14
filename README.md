@@ -29,12 +29,12 @@ This library introduces an abstraction layer that provides a push-for-audio and 
 </dl>
 <h3>Function Reference:</h3>
 <dl>
-	<dt>void writeAudio (Array buffer)</dt>
-		<dd>Arguments: Pass an array of audio samples that is divisible by the number of audio channels utilized (buffer % channels == 0).</dd>
+	<dt>void writeAudio (Array buffer, Integer upTo)</dt>
+		<dd>Arguments: Pass an array of audio samples that is divisible by the number of audio channels utilized (buffer % channels == 0), and an integer length delimiter that follows the same restriction.</dd>
 		<dd>Functionality: Passes the audio samples directly into the underlying audio subsystem, <b>and can call the specified sample buffer under-run callback as needed (Does the equivalent of executeCallback in addition to the forced sample input.)<b>.</dd>
 		<dd>Return: void (None).</dd>
-	<dt>void writeAudioNoCallback (Array buffer)</dt>
-		<dd>Arguments: Pass an array of audio samples that is divisible by the number of audio channels utilized (buffer % channels == 0).</dd>
+	<dt>void writeAudioNoCallback (Array buffer, Integer upTo)</dt>
+		<dd>Arguments: Pass an array of audio samples that is divisible by the number of audio channels utilized (buffer % channels == 0), and an integer length delimiter that follows the same restriction.</dd>
 		<dd>Functionality: Passes the audio samples directly into the underlying audio subsystem.</dd>
 		<dd>Return: void (None).</dd>
 	<dt>int remainingBuffer (void)</dt>
@@ -46,7 +46,7 @@ This library introduces an abstraction layer that provides a push-for-audio and 
 		<dd>Arguments: void (None).</dd>
 		<dd>Functionality: Executes the audio sample under-run callback if the samples remaining is below the set buffer low limit.</dd>
 		<dd>Return: void (None).</dd>
-	<dt>void changeVolume (double)</dt>
+	<dt>void changeVolume (double volume)</dt>
 		<dd>Arguments: double float between 0 and 1 specifying the volume.</dd>
 		<dd>Functionality: Changes the volume. Will affect samples in buffer, so has a low-latency effect (Use this to do a fast-mute).</dd>
 		<dd>Return: void (None).</dd>
