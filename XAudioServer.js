@@ -342,6 +342,7 @@ XAudioServer.prototype.getFloat32 = function (size) {
 	}
 }
 function XAudioJSFlashAudioEvent() {		//The callback that flash calls...
+    XAudioJSCallbackAPIEventNotificationCallbackCompatTimerClear();
 	XAudioJSCallbackAPIEventNotification();
     XAudioJSResampleRefill();
 	return XAudioJSFlashTransportEncoder();
@@ -396,6 +397,7 @@ var XAudioJSWebAudioContextHandle = null;
 var XAudioJSWebAudioAudioNode = null;
 var XAudioJSWebAudioWatchDogTimer = null;
 var XAudioJSCallbackAPIEventNotificationCallback = null;
+var XAudioJSCallbackAPIEventNotificationCallbackCompatTimer = setInterval(XAudioJSCallbackAPIEventNotification, 16);
 var XAudioJSWebAudioWatchDogLast = false;
 var XAudioJSWebAudioLaunchedContext = false;
 var XAudioJSAudioContextSampleBuffer = [];
@@ -425,6 +427,7 @@ function XAudioJSWebAudioEvent(event) {		//Web Audio API callback...
 	for (var bufferCount = 0, buffers = []; bufferCount < XAudioJSChannelsAllocated; ++bufferCount) {
 		buffers[bufferCount] = event.outputBuffer.getChannelData(bufferCount);
 	}
+    XAudioJSCallbackAPIEventNotificationCallbackCompatTimerClear();
 	XAudioJSCallbackAPIEventNotification();
     //Make sure we have resampled samples ready:
 	XAudioJSResampleRefill();
@@ -457,6 +460,7 @@ function XAudioJSMediaStreamPushAudio(event) {
 	if (XAudioJSMediaStreamBuffer.length != samplesPerCallbackAll) {
 		XAudioJSMediaStreamBuffer = new Float32Array(samplesPerCallbackAll);
 	}
+    XAudioJSCallbackAPIEventNotificationCallbackCompatTimerClear();
     XAudioJSCallbackAPIEventNotification();
 	XAudioJSResampleRefill();
 	while (index < audioLengthRequested) {
@@ -490,6 +494,11 @@ function XAudioJSResampleRefill() {
 		}
 		XAudioJSAudioBufferSize = 0;
 	}
+}
+function XAudioJSCallbackAPIEventNotificationCallbackCompatTimerClear() {
+    if (XAudioJSCallbackAPIEventNotificationCallbackCompatTimer) {
+        clearInterval(XAudioJSCallbackAPIEventNotificationCallbackCompatTimer);
+    }
 }
 function XAudioJSCallbackAPIEventNotification() {
     if (typeof XAudioJSCallbackAPIEventNotificationCallback == "function") {
