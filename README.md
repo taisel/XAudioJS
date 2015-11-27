@@ -1,13 +1,13 @@
 <h1>XAudioJS</h1>
 <h3>A minimal cross-browser API for writing PCM audio samples:</h3>
-<p>This simple JavaScript library abstracts the push-for-audio API of Mozilla Audio, the MediaStream API in experimental Firefox Nightlies, and the passive callback API of Web Audio.
-This library introduces an abstraction layer that provides a push-for-audio and a callback API in one. We even provide a flash fallback to bring us to a total of 4 APIs supported.</p>
+<p>This simple JavaScript library abstracts the push-for-audio API of Mozilla Audio, and the passive callback API of Web Audio.
+This library introduces an abstraction layer that provides a push-for-audio and a callback API in one. We even provide a flash fallback to bring us to a total of 3 APIs supported.</p>
 <br>
 <b>This software is hereby placed in the public domain for anyone to use.</b>
 <br>
 <h3>How To Initialize:</h3>
 <dl>
-	<dt>new XAudioServer(int channels, double sampleRate, int bufferLow, int bufferHigh, function underRunCallback, double volume, function failureCallback);</dt>
+	<dt>new XAudioServer(int channels, double sampleRate, int bufferLow, int bufferHigh, function underRunCallback, function heartbeatCallback, double volume, function failureCallback);</dt>
 		<dd>Make sure only one instance of XAudioServer is running at any time.</dd>
 		<dd>bufferLow MUST be less than bufferHigh.</dd>
 		<dd>bufferHigh sets the internal FIFO buffer length for all APIs except the Mozilla Audio Data API. Overfill on FIFO causes the oldest samples to be dropped first.</dd>
@@ -19,6 +19,12 @@ This library introduces an abstraction layer that provides a push-for-audio and 
 				Return: Array of samples to be passed into the underlying audio buffer. MUST be divisible by number of channels used (Whole frames required.). The return array length DOES NOT NEED to be of length samplesRequested.
 			</blockquote>
 		</dd>
+        <dd>
+            <h4>void heartbeatCallback (void)</h4>
+            <blockquote>
+                Functionality: JS developers set this callback as a way to program against an audio clock.
+            </blockquote>
+        </dd>
 		<dd>volume is the output volume.</dd>
 		<dd>
 			<h4>void failureCallback (void)</h4>
