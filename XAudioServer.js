@@ -318,7 +318,7 @@ function XAudioJSFlashAudioEvent() {		//The callback that flash calls...
     XAudioJSCallbackAPIEventNotificationCallbackCompatTimerClear();
 	XAudioJSCallbackAPIEventNotification();
     XAudioJSResampleRefill();
-	var outputStr XAudioJSFlashTransportEncoder();
+	var outputStr = XAudioJSFlashTransportEncoder();
     XAudioJSCallbackAPIEventNotification2();
     return outputStr;
 }
