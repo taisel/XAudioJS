@@ -3,13 +3,14 @@
 //Released to Public Domain
 var XAudioJSscriptsHandle = document.getElementsByTagName("script");
 var XAudioJSsourceHandle = XAudioJSscriptsHandle[XAudioJSscriptsHandle.length-1].src;
-function XAudioServer(channels, sampleRate, minBufferSize, maxBufferSize, underRunCallback, heartbeatCallback, volume, failureCallback) {
+function XAudioServer(channels, sampleRate, minBufferSize, maxBufferSize, underRunCallback, heartbeatCallback, postheartbeatCallback, volume, failureCallback) {
 	XAudioJSChannelsAllocated = Math.max(channels, 1);
 	this.XAudioJSSampleRate = Math.abs(sampleRate);
 	XAudioJSMinBufferSize = (minBufferSize >= (XAudioJSSamplesPerCallback * XAudioJSChannelsAllocated) && minBufferSize < maxBufferSize) ? (minBufferSize & (-XAudioJSChannelsAllocated)) : (XAudioJSSamplesPerCallback * XAudioJSChannelsAllocated);
 	XAudioJSMaxBufferSize = (Math.floor(maxBufferSize) > XAudioJSMinBufferSize + XAudioJSChannelsAllocated) ? (maxBufferSize & (-XAudioJSChannelsAllocated)) : (XAudioJSMinBufferSize * XAudioJSChannelsAllocated);
 	this.underRunCallback = (typeof underRunCallback == "function") ? underRunCallback : function () {};
     XAudioJSCallbackAPIEventNotificationCallback = (typeof heartbeatCallback == "function") ? heartbeatCallback : null;
+    XAudioJSCallbackAPIEventNotificationCallback2 = (typeof postheartbeatCallback == "function") ? postheartbeatCallback : null;
 	XAudioJSVolume = (volume >= 0 && volume <= 1) ? volume : 1;
 	this.failureCallback = (typeof failureCallback == "function") ? failureCallback : function () { throw(new Error("XAudioJS has encountered a fatal error.")); };
 	this.initializeAudio();
@@ -317,7 +318,9 @@ function XAudioJSFlashAudioEvent() {		//The callback that flash calls...
     XAudioJSCallbackAPIEventNotificationCallbackCompatTimerClear();
 	XAudioJSCallbackAPIEventNotification();
     XAudioJSResampleRefill();
-	return XAudioJSFlashTransportEncoder();
+	var outputStr XAudioJSFlashTransportEncoder();
+    XAudioJSCallbackAPIEventNotification2();
+    return outputStr;
 }
 function XAudioJSGenerateFlashSurroundString() {	//Convert the arrays to one long string for speed.
 	var XAudioJSTotalSamples = XAudioJSSamplesPerCallback << 1;
@@ -369,7 +372,8 @@ var XAudioJSWebAudioContextHandle = null;
 var XAudioJSWebAudioAudioNode = null;
 var XAudioJSWebAudioWatchDogTimer = null;
 var XAudioJSCallbackAPIEventNotificationCallback = null;
-var XAudioJSCallbackAPIEventNotificationCallbackCompatTimer = setInterval(XAudioJSCallbackAPIEventNotification, 16);
+var XAudioJSCallbackAPIEventNotificationCallback2 = null;
+var XAudioJSCallbackAPIEventNotificationCallbackCompatTimer = setInterval(XAudioJSCallbackAPIEventNotificationDual, 16);
 var XAudioJSWebAudioWatchDogLast = false;
 var XAudioJSWebAudioLaunchedContext = false;
 var XAudioJSAudioContextSampleBuffer = [];
@@ -415,6 +419,7 @@ function XAudioJSWebAudioEvent(event) {		//Web Audio API callback...
 		}
 		++index;
 	}
+    XAudioJSCallbackAPIEventNotification2();
 }
 function XAudioJSResampleRefill() {
 	if (XAudioJSAudioBufferSize > 0) {
@@ -445,6 +450,15 @@ function XAudioJSCallbackAPIEventNotification() {
     if (typeof XAudioJSCallbackAPIEventNotificationCallback == "function") {
         XAudioJSCallbackAPIEventNotificationCallback();
     }
+}
+function XAudioJSCallbackAPIEventNotification2() {
+    if (typeof XAudioJSCallbackAPIEventNotificationCallback2 == "function") {
+        XAudioJSCallbackAPIEventNotificationCallback2();
+    }
+}
+function XAudioJSCallbackAPIEventNotificationDual() {
+    XAudioJSCallbackAPIEventNotification();
+    XAudioJSCallbackAPIEventNotification2();
 }
 function XAudioJSResampledSamplesLeft() {
 	return ((XAudioJSResampleBufferStart <= XAudioJSResampleBufferEnd) ? 0 : XAudioJSResampleBufferSize) + XAudioJSResampleBufferEnd - XAudioJSResampleBufferStart;
