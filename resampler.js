@@ -161,7 +161,7 @@ Resampler.prototype.bypassResampler = function (upTo) {
 }
 Resampler.prototype.initializeBuffers = function () {
 	//Initialize the internal buffer:
-    var outputBufferSize = (Math.ceil(this.inputBuffer.length * this.toSampleRate / this.fromSampleRate / this.channels * 1.01) * this.channels) + this.channels;
+    var outputBufferSize = (Math.ceil(this.inputBuffer.length * this.toSampleRate / this.fromSampleRate / this.channels * 1.000000476837158203125) * this.channels) + this.channels;
 	try {
 		this.outputBuffer = new Float32Array(outputBufferSize);
 		this.lastOutput = new Float32Array(this.channels);
