@@ -7,7 +7,7 @@ This library introduces an abstraction layer that provides a push-for-audio and 
 <br>
 <h3>How To Initialize:</h3>
 <dl>
-	<dt>new XAudioServer(int channels, double sampleRate, int bufferLow, int bufferHigh, function underRunCallback, function heartbeatCallback, function postheartbeatCallback, double volume, function failureCallback);</dt>
+	<dt>new XAudioServer(int channels, double sampleRate, int bufferLow, int bufferHigh, function underRunCallback, function heartbeatCallback, function postheartbeatCallback, double volume, function failureCallback, object userEventLatch);</dt>
 		<dd>Make sure only one instance of XAudioServer is running at any time.</dd>
 		<dd>bufferLow MUST be less than bufferHigh.</dd>
 		<dd>bufferHigh sets the internal FIFO buffer length for all APIs except the Mozilla Audio Data API. Overfill on FIFO causes the oldest samples to be dropped first.</dd>
@@ -36,6 +36,12 @@ This library introduces an abstraction layer that provides a push-for-audio and 
 			<h4>void failureCallback (void)</h4>
 			<blockquote>
 				Functionality: JS developers set this callback to handle no audio support being available from the browser.
+			</blockquote>
+		</dd>
+		<dd>
+			<h4>object userEventLatch</h4>
+			<blockquote>
+				Functionality: JS developers set this DOM object for the Web Audio API to enable audio from.
 			</blockquote>
 		</dd>
 </dl>

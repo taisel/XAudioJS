@@ -3,7 +3,7 @@
 //Released to Public Domain
 var XAudioJSscriptsHandle = document.getElementsByTagName("script");
 var XAudioJSsourceHandle = XAudioJSscriptsHandle[XAudioJSscriptsHandle.length-1].src;
-function XAudioServer(channels, sampleRate, minBufferSize, maxBufferSize, underRunCallback, heartbeatCallback, postheartbeatCallback, volume, failureCallback) {
+function XAudioServer(channels, sampleRate, minBufferSize, maxBufferSize, underRunCallback, heartbeatCallback, postheartbeatCallback, volume, failureCallback, userEventLatch) {
 	XAudioJSChannelsAllocated = Math.max(channels, 1);
 	this.XAudioJSSampleRate = Math.abs(sampleRate);
 	XAudioJSMinBufferSize = (minBufferSize >= (XAudioJSSamplesPerCallback * XAudioJSChannelsAllocated) && minBufferSize < maxBufferSize) ? (minBufferSize & (-XAudioJSChannelsAllocated)) : (XAudioJSSamplesPerCallback * XAudioJSChannelsAllocated);
@@ -13,6 +13,7 @@ function XAudioServer(channels, sampleRate, minBufferSize, maxBufferSize, underR
     XAudioJSCallbackAPIEventNotificationCallback2 = (typeof postheartbeatCallback == "function") ? postheartbeatCallback : null;
 	XAudioJSVolume = (volume >= 0 && volume <= 1) ? volume : 1;
 	this.failureCallback = (typeof failureCallback == "function") ? failureCallback : function () { throw(new Error("XAudioJS has encountered a fatal error.")); };
+	this.userEventLatch = (typeof userEventLach == "object") ? userEventLatch : null;
 	this.initializeAudio();
 }
 XAudioServer.prototype.MOZWriteAudioNoCallback = function (buffer, upTo) {
@@ -207,6 +208,13 @@ XAudioServer.prototype.initializeWebAudio = function () {
             }
         }, 500);
     }
+	if (this.userEventLatch) {
+		this.userEventLatch.addEventListener("click", function () {
+			if(XAudioJSWebAudioContextHandle.state === 'suspended') {
+				XAudioJSWebAudioContextHandle.resume();
+			}
+		}, false);
+	}
 }
 XAudioServer.prototype.initializeFlashAudio = function () {
 	var existingFlashload = document.getElementById("XAudioJS");
