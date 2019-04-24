@@ -209,17 +209,15 @@ XAudioServer.prototype.initializeWebAudio = function () {
         }, 500);
     }
 	if (this.userEventLatch) {
+		var lazyEnableWA = function () {
+			if(XAudioJSWebAudioContextHandle.state === 'suspended') {
+				XAudioJSWebAudioContextHandle.resume();
+			}
+		}
 		try {
-			this.userEventLatch.addEventListener("click", function () {
-				if(XAudioJSWebAudioContextHandle.state === 'suspended') {
-					XAudioJSWebAudioContextHandle.resume();
-				}
-			}, false);
-			this.userEventLatch.addEventListener("touchstart", function () {
-				if(XAudioJSWebAudioContextHandle.state === 'suspended') {
-					XAudioJSWebAudioContextHandle.resume();
-				}
-			}, false);
+			this.userEventLatch.addEventListener("click", lazyEnableWA, false);
+			this.userEventLatch.addEventListener("touchstart", lazyEnableWA, false);
+			this.userEventLatch.addEventListener("touchend", lazyEnableWA, false);
 		}
 		catch (e) {}
 	}
