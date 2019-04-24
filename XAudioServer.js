@@ -209,11 +209,19 @@ XAudioServer.prototype.initializeWebAudio = function () {
         }, 500);
     }
 	if (this.userEventLatch) {
-		this.userEventLatch.addEventListener("click", function () {
-			if(XAudioJSWebAudioContextHandle.state === 'suspended') {
-				XAudioJSWebAudioContextHandle.resume();
-			}
-		}, false);
+		try {
+			this.userEventLatch.addEventListener("click", function () {
+				if(XAudioJSWebAudioContextHandle.state === 'suspended') {
+					XAudioJSWebAudioContextHandle.resume();
+				}
+			}, false);
+			this.userEventLatch.addEventListener("touchstart", function () {
+				if(XAudioJSWebAudioContextHandle.state === 'suspended') {
+					XAudioJSWebAudioContextHandle.resume();
+				}
+			}, false);
+		}
+		catch (e) {}
 	}
 }
 XAudioServer.prototype.initializeFlashAudio = function () {
