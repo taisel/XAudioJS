@@ -202,10 +202,15 @@ XAudioServer.prototype.initializeWebAudio = function () {
         }
         var parentObj = this;
         XAudioJSWebAudioWatchDogTimer = setInterval(function () {
-            var timeDiff = (new Date()).getTime() - XAudioJSWebAudioWatchDogLast;
-            if (timeDiff > 500) {
-                parentObj.initializeWebAudio();
-            }
+			if(XAudioJSWebAudioContextHandle.state === 'suspended') {
+				XAudioJSWebAudioWatchDogLast = (new Date()).getTime();
+			}
+			else {
+				var timeDiff = (new Date()).getTime() - XAudioJSWebAudioWatchDogLast;
+				if (timeDiff > 500) {
+					parentObj.initializeWebAudio();
+				}
+			}
         }, 500);
     }
 	if (this.userEventLatch) {
