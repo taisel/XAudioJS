@@ -165,8 +165,17 @@ XAudioServer.prototype.initializeMozAudio = function () {
     this.initializeResampler(XAudioJSMozAudioSampleRate);
 }
 XAudioServer.prototype.initializeWebAudio = function () {
-	this.setupWebAudio();
-    this.resetCallbackAPIAudioBuffer(XAudioJSWebAudioContextHandle.sampleRate);
+	if (!this.userEventLatch) {
+		this.setupWebAudio();
+	}
+	else {
+		//TODO: Restructure API to not have to potentially lie to end client about
+		//the samples in buffer before user driven event callback that actually starts WA.
+		this.resetCallbackAPIAudioBuffer(44100);
+	}
+	if (typeof AudioContext != "undefined" || typeof XAudioJSWebAudioContextHandle != "undefined") {
+		throw null;
+	}
     this.audioType = 1;
     /*
      Firefox has a bug in its web audio implementation...
@@ -237,6 +246,7 @@ XAudioServer.prototype.setupWebAudio = function () {
     }
     XAudioJSWebAudioAudioNode.onaudioprocess = XAudioJSWebAudioEvent;																			//Connect the audio processing event to a handling function so we can manipulate output
     XAudioJSWebAudioAudioNode.connect(XAudioJSWebAudioContextHandle.destination);																//Send and chain the output of the audio manipulation to the system audio output.
+	this.resetCallbackAPIAudioBuffer(XAudioJSWebAudioContextHandle.sampleRate);
 }
 XAudioServer.prototype.initializeFlashAudio = function () {
 	var existingFlashload = document.getElementById("XAudioJS");
