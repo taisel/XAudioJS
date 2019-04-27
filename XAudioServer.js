@@ -13,7 +13,7 @@ function XAudioServer(channels, sampleRate, minBufferSize, maxBufferSize, underR
     XAudioJSCallbackAPIEventNotificationCallback2 = (typeof postheartbeatCallback == "function") ? postheartbeatCallback : null;
 	XAudioJSVolume = (volume >= 0 && volume <= 1) ? volume : 1;
 	this.failureCallback = (typeof failureCallback == "function") ? failureCallback : function () { throw(new Error("XAudioJS has encountered a fatal error.")); };
-	this.userEventLatch = (typeof userEventLach == "object") ? userEventLatch : null;
+	this.userEventLatch = (typeof userEventLach == "function") ? userEventLatch : null;
 	this.initializeAudio();
 }
 XAudioServer.prototype.MOZWriteAudioNoCallback = function (buffer, upTo) {
@@ -165,61 +165,29 @@ XAudioServer.prototype.initializeMozAudio = function () {
     this.initializeResampler(XAudioJSMozAudioSampleRate);
 }
 XAudioServer.prototype.initializeWebAudio = function () {
-	if (!this.userEventLatch) {
-		this.setupWebAudio();
-	}
-	else {
-		//TODO: Restructure API to not have to potentially lie to end client about
-		//the samples in buffer before user driven event callback that actually starts WA.
-		this.resetCallbackAPIAudioBuffer(44100);
-	}
-	if (typeof AudioContext != "undefined" || typeof XAudioJSWebAudioContextHandle != "undefined") {
+	if (typeof AudioContext == "undefined" || typeof XAudioJSWebAudioContextHandle == "undefined") {
 		throw null;
 	}
-    this.audioType = 1;
-    /*
-     Firefox has a bug in its web audio implementation...
-     The node may randomly stop playing on Mac OS X for no
-     good reason. Keep a watchdog timer to restart the failed
-     node if it glitches. Google Chrome never had this issue.
-     */
-    XAudioJSWebAudioWatchDogLast = (new Date()).getTime();
-    if (navigator.userAgent.indexOf('Gecko/') > -1) {
-        if (XAudioJSWebAudioWatchDogTimer) {
-            clearInterval(XAudioJSWebAudioWatchDogTimer);
-        }
-        var parentObj = this;
-        XAudioJSWebAudioWatchDogTimer = setInterval(function () {
-			if(typeof XAudioJSWebAudioContextHandle.state != "undefined") {
-				if (XAudioJSWebAudioContextHandle.state === 'suspended') {
-					XAudioJSWebAudioWatchDogLast = (new Date()).getTime();
-					try {
-						XAudioJSWebAudioContextHandle.resume();
-					}
-					catch (e) {}
-				}
-				else {
-					var timeDiff = (new Date()).getTime() - XAudioJSWebAudioWatchDogLast;
-					if (timeDiff > 500) {
-						parentObj.initializeWebAudio();
-					}
-				}
-			}
-        }, 500);
-    }
-	if (this.userEventLatch && typeof XAudioJSWebAudioContextHandle.state != "undefined") {
-		var parentObj = this;
-		var lazyEnableWA = function () {
-			if(XAudioJSWebAudioContextHandle.state === 'suspended') {
+	else {
+		if (!this.userEventLatch) {
+			this.setupWebAudio();
+		}
+		else {
+			var parentObj = this;
+			var lazyEnableWA = function () {
 				parentObj.setupWebAudio();
 			}
+			try {
+				this.userEventLatch.addEventListener("click", lazyEnableWA, false);
+				this.userEventLatch.addEventListener("touchstart", lazyEnableWA, false);
+				this.userEventLatch.addEventListener("touchend", lazyEnableWA, false);
+			}
+			catch (e) {}
+			//TODO: Restructure API to not have to potentially lie to end client about
+			//the samples in buffer before user driven event callback that actually starts WA.
+			this.resetCallbackAPIAudioBuffer(44100);
 		}
-		try {
-			this.userEventLatch.addEventListener("click", lazyEnableWA, false);
-			this.userEventLatch.addEventListener("touchstart", lazyEnableWA, false);
-			this.userEventLatch.addEventListener("touchend", lazyEnableWA, false);
-		}
-		catch (e) {}
+		this.audioType = 1;
 	}
 }
 XAudioServer.prototype.setupWebAudio = function () {
@@ -247,6 +215,36 @@ XAudioServer.prototype.setupWebAudio = function () {
     XAudioJSWebAudioAudioNode.onaudioprocess = XAudioJSWebAudioEvent;																			//Connect the audio processing event to a handling function so we can manipulate output
     XAudioJSWebAudioAudioNode.connect(XAudioJSWebAudioContextHandle.destination);																//Send and chain the output of the audio manipulation to the system audio output.
 	this.resetCallbackAPIAudioBuffer(XAudioJSWebAudioContextHandle.sampleRate);
+	/*
+     Firefox has a bug in its web audio implementation...
+     The node may randomly stop playing on Mac OS X for no
+     good reason. Keep a watchdog timer to restart the failed
+     node if it glitches. Google Chrome never had this issue.
+     */
+    XAudioJSWebAudioWatchDogLast = (new Date()).getTime();
+    if (!XAudioJSWebAudioWatchDogTimer && navigator.userAgent.indexOf('Gecko/') > -1) {
+        if (XAudioJSWebAudioWatchDogTimer) {
+            clearInterval(XAudioJSWebAudioWatchDogTimer);
+        }
+        var parentObj = this;
+        XAudioJSWebAudioWatchDogTimer = setInterval(function () {
+			if(typeof XAudioJSWebAudioContextHandle.state != "undefined") {
+				if (XAudioJSWebAudioContextHandle.state === 'suspended') {
+					XAudioJSWebAudioWatchDogLast = (new Date()).getTime();
+					try {
+						XAudioJSWebAudioContextHandle.resume();
+					}
+					catch (e) {}
+				}
+				else {
+					var timeDiff = (new Date()).getTime() - XAudioJSWebAudioWatchDogLast;
+					if (timeDiff > 500) {
+						parentObj.setupWebAudio();
+					}
+				}
+			}
+        }, 500);
+    }
 }
 XAudioServer.prototype.initializeFlashAudio = function () {
 	var existingFlashload = document.getElementById("XAudioJS");
