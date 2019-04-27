@@ -174,15 +174,25 @@ XAudioServer.prototype.initializeWebAudio = function () {
 		}
 		else {
 			var parentObj = this;
-			var lazyEnableWA = function () {
-				parentObj.setupWebAudio();
-			}
-			try {
-				this.userEventLatch.addEventListener("click", lazyEnableWA, false);
-				this.userEventLatch.addEventListener("touchstart", lazyEnableWA, false);
-				this.userEventLatch.addEventListener("touchend", lazyEnableWA, false);
-			}
-			catch (e) {}
+			var XAudioJSWebAudioDelayedEvent = 0;
+			this.userEventLatch.addEventListener("click", function () {
+				if (XAudioJSWebAudioDelayedEvent == 0) {
+					parentObj.setupWebAudio();
+					XAudioJSWebAudioDelayedEvent |= 1;
+				}
+			}, false);
+			this.userEventLatch.addEventListener("touchstart", function () {
+				if (XAudioJSWebAudioDelayedEvent < 2) {
+					parentObj.setupWebAudio();
+					XAudioJSWebAudioDelayedEvent |= 2;
+				}
+			}, false);
+			this.userEventLatch.addEventListener("touchend", function () {
+				if (XAudioJSWebAudioDelayedEvent < 4) {
+					parentObj.setupWebAudio();
+					XAudioJSWebAudioDelayedEvent |= 4;
+				}
+			}, false);
 			//TODO: Restructure API to not have to potentially lie to end client about
 			//the samples in buffer before user driven event callback that actually starts WA.
 			this.resetCallbackAPIAudioBuffer(44100);
