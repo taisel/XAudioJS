@@ -13,7 +13,7 @@ function XAudioServer(channels, sampleRate, minBufferSize, maxBufferSize, underR
     XAudioJSCallbackAPIEventNotificationCallback2 = (typeof postheartbeatCallback == "function") ? postheartbeatCallback : null;
 	XAudioJSVolume = (volume >= 0 && volume <= 1) ? volume : 1;
 	this.failureCallback = (typeof failureCallback == "function") ? failureCallback : function () { throw(new Error("XAudioJS has encountered a fatal error.")); };
-	this.userEventLatch = (typeof userEventLach == "object") ? userEventLatch : null;
+	this.userEventLatch = (typeof userEventLatch == "object") ? userEventLatch : null;
 	this.initializeAudio();
 }
 XAudioServer.prototype.MOZWriteAudioNoCallback = function (buffer, upTo) {
