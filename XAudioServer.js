@@ -216,6 +216,8 @@ XAudioServer.prototype.setupWebAudio = function () {
         XAudioJSWebAudioAudioNode.onaudioprocess = null;
         XAudioJSWebAudioAudioNode = null;
     }
+	XAudioJSSamplesPerCallback = Math.pow(2, 11 + Math.floor(XAudioJSWebAudioContextHandle.sampleRate / 96000));
+	XAudioJSMaxBufferSize = Math.max(XAudioJSSamplesPerCallback * XAudioJSChannelsAllocated, XAudioJSMaxBufferSize);
     try {
         XAudioJSWebAudioAudioNode = XAudioJSWebAudioContextHandle.createScriptProcessor(XAudioJSSamplesPerCallback, 0, XAudioJSChannelsAllocated);	//Create the js event node.
     }
